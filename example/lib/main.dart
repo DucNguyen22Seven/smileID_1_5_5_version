@@ -2,13 +2,17 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:smile_id/smile_id_document_capture_view.dart';
+import 'package:smile_id/smile_id_smart_selfie_capture_view.dart';
 import 'package:smile_id/smileid_messages.g.dart';
 import 'package:smile_id/smile_id.dart';
 import 'package:smile_id/smile_id_biometric_kyc.dart';
 import 'package:smile_id/smile_id_document_verification.dart';
 import 'package:smile_id/smile_id_enhanced_document_verification.dart';
 import 'package:smile_id/smile_id_smart_selfie_authentication.dart';
+import 'package:smile_id/smile_id_smart_selfie_authentication_enhanced.dart';
 import 'package:smile_id/smile_id_smart_selfie_enrollment.dart';
+import 'package:smile_id/smile_id_smart_selfie_enrollment_enhanced.dart';
 
 // ignore_for_file: avoid_print
 
@@ -38,7 +42,7 @@ class _MyAppState extends State<MyApp> {
     if (!mounted) return;
     // replace with your own credentials
     SmileID.initialize(
-        useSandbox: false,
+      useSandbox: false,
     );
   }
 
@@ -84,7 +88,11 @@ class MainContent extends StatelessWidget {
         enhancedDocumentVerificationButton(context),
         smartSelfieEnrollmentButton(context),
         smartSelfieAuthenticationButton(context),
-        biometricKycButton(context)
+        smartSelfieEnrollmentButtonEnhanced(context),
+        smartSelfieAuthenticationButtonEnhanced(context),
+        biometricKycButton(context),
+        selfieCaptureButton(context),
+        documentCaptureButton(context)
       ],
     )));
   }
@@ -95,7 +103,7 @@ class MainContent extends StatelessWidget {
         onPressed: () {
           // replace with your own credentials
           SmileID.initialize(
-              useSandbox: false,
+            useSandbox: false,
           );
           var userId = "<your user's user ID>";
           SmileID.api
@@ -242,6 +250,64 @@ class MainContent extends StatelessWidget {
     );
   }
 
+  Widget smartSelfieEnrollmentButtonEnhanced(BuildContext context) {
+    return ElevatedButton(
+      child: const Text("SmartSelfie Enrollment (Enhanced)"),
+      onPressed: () {
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (BuildContext context) => MyScaffold(
+                body: SmileIDSmartSelfieEnrollmentEnhanced(
+                  onSuccess: (String? result) {
+                    // Your success handling logic
+                    Map<String, dynamic> jsonResult = json.decode(result ?? '{}');
+                    String formattedResult = jsonEncode(jsonResult);
+                    final snackBar = SnackBar(content: Text("Success: $formattedResult"));
+                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                    Navigator.of(context).pop();
+                  },
+                  onError: (String errorMessage) {
+                    // Your error handling logic
+                    final snackBar = SnackBar(content: Text("Error: $errorMessage"));
+                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                    Navigator.of(context).pop();
+                  },
+                )),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget smartSelfieAuthenticationButtonEnhanced(BuildContext context) {
+    return ElevatedButton(
+      child: const Text("SmartSelfie Authentication (Enhanced)"),
+      onPressed: () {
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (BuildContext context) => MyScaffold(
+                body: SmileIDSmartSelfieAuthenticationEnhanced(
+                  onSuccess: (String? result) {
+                    // Your success handling logic
+                    Map<String, dynamic> jsonResult = json.decode(result ?? '{}');
+                    String formattedResult = jsonEncode(jsonResult);
+                    final snackBar = SnackBar(content: Text("Success: $formattedResult"));
+                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                    Navigator.of(context).pop();
+                  },
+                  onError: (String errorMessage) {
+                    // Your error handling logic
+                    final snackBar = SnackBar(content: Text("Error: $errorMessage"));
+                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                    Navigator.of(context).pop();
+                  },
+                )),
+          ),
+        );
+      },
+    );
+  }
+
   Widget biometricKycButton(BuildContext context) {
     return ElevatedButton(
       child: const Text("Biometric KYC"),
@@ -253,6 +319,73 @@ class MainContent extends StatelessWidget {
               country: "KE",
               idType: "NATIONAL_ID",
               idNumber: "12345678",
+              onSuccess: (String? result) {
+                // Your success handling logic
+                Map<String, dynamic> jsonResult = json.decode(result ?? '{}');
+                String formattedResult = jsonEncode(jsonResult);
+                final snackBar = SnackBar(content: Text("Success: $formattedResult"));
+                ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                Navigator.of(context).pop();
+              },
+              onError: (String errorMessage) {
+                // Your error handling logic
+                final snackBar = SnackBar(content: Text("Error: $errorMessage"));
+                ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                Navigator.of(context).pop();
+              },
+            )),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget selfieCaptureButton(BuildContext context) {
+    return ElevatedButton(
+      child: const Text("Selfie Capture"),
+      onPressed: () {
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (BuildContext context) => MyScaffold(
+                body: SmileIDSmartSelfieCaptureView(
+              showConfirmationDialog: false,
+              showInstructions: true,
+              showAttribution: false,
+              allowAgentMode: false,
+              onSuccess: (String? result) {
+                // Your success handling logic
+                Map<String, dynamic> jsonResult = json.decode(result ?? '{}');
+                String formattedResult = jsonEncode(jsonResult);
+                final snackBar = SnackBar(content: Text("Success: $formattedResult"));
+                ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                Navigator.of(context).pop();
+              },
+              onError: (String errorMessage) {
+                // Your error handling logic
+                final snackBar = SnackBar(content: Text("Error: $errorMessage"));
+                ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                Navigator.of(context).pop();
+              },
+            )),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget documentCaptureButton(BuildContext context) {
+    return ElevatedButton(
+      child: const Text("Document Capture"),
+      onPressed: () {
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (BuildContext context) => MyScaffold(
+                body: SmileIDDocumentCaptureView(
+              isDocumentFrontSide: false,
+              showConfirmationDialog: true,
+              showInstructions: true,
+              showAttribution: false,
+              allowGalleryUpload: false,
               onSuccess: (String? result) {
                 // Your success handling logic
                 Map<String, dynamic> jsonResult = json.decode(result ?? '{}');

@@ -4,8 +4,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-class SmileIDSmartSelfieAuthentication extends StatelessWidget {
-  static const String viewType = "SmileIDSmartSelfieAuthentication";
+class SmileIDDocumentCaptureView extends StatelessWidget {
+  static const String viewType = "SmileIDDocumentCaptureView";
   final Map<String, dynamic> creationParams;
 
   /// Called when the user successfully completes the smart selfie enrollment flow. The result is a
@@ -13,37 +13,33 @@ class SmileIDSmartSelfieAuthentication extends StatelessWidget {
   final Function(String) onSuccess;
   final Function(String) onError;
 
-  const SmileIDSmartSelfieAuthentication._({
+  const SmileIDDocumentCaptureView._({
     required this.creationParams,
     required this.onSuccess,
     required this.onError,
   });
 
-  factory SmileIDSmartSelfieAuthentication({
+  factory SmileIDDocumentCaptureView({
     Key? key,
-    // userId can't actually be null in the native SDK but we delegate their creation to
-    // the native platform code, since that's where the random ID creation happens
-    String? userId,
-    bool allowNewEnroll = false,
-    bool allowAgentMode = false,
-    bool showAttribution = true,
+    bool isDocumentFrontSide = true,
     bool showInstructions = true,
-    bool skipApiSubmission = false,
-    Map<String, String>? extraPartnerParams,
+    bool showAttribution = true,
+    bool allowGalleryUpload = true,
+    bool showConfirmationDialog = true,
+    double? idAspectRatio,
     required Function(String resultJson) onSuccess,
     required Function(String errorMessage) onError,
   }) {
-    return SmileIDSmartSelfieAuthentication._(
+    return SmileIDDocumentCaptureView._(
       onSuccess: onSuccess,
       onError: onError,
       creationParams: {
-        "userId": userId,
-        "allowNewEnroll": allowNewEnroll,
-        "allowAgentMode": allowAgentMode,
-        "showAttribution": showAttribution,
+        "isDocumentFrontSide": isDocumentFrontSide,
         "showInstructions": showInstructions,
-        "skipApiSubmission" : skipApiSubmission,
-        "extraPartnerParams" : extraPartnerParams,
+        "showAttribution": showAttribution,
+        "allowGalleryUpload": allowGalleryUpload,
+        "showConfirmationDialog": showConfirmationDialog,
+        "idAspectRatio": idAspectRatio,
       },
     );
   }

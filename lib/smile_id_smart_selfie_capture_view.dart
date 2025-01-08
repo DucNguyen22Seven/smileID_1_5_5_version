@@ -4,46 +4,38 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-class SmileIDSmartSelfieAuthentication extends StatelessWidget {
-  static const String viewType = "SmileIDSmartSelfieAuthentication";
+class SmileIDSmartSelfieCaptureView extends StatelessWidget {
+  static const String viewType = "SmileIDSmartSelfieCaptureView";
   final Map<String, dynamic> creationParams;
 
-  /// Called when the user successfully completes the smart selfie enrollment flow. The result is a
+  /// Called when the user successfully completes the selfie capture flow. The result is a
   /// JSON string.
   final Function(String) onSuccess;
   final Function(String) onError;
 
-  const SmileIDSmartSelfieAuthentication._({
+  const SmileIDSmartSelfieCaptureView._({
     required this.creationParams,
     required this.onSuccess,
     required this.onError,
   });
 
-  factory SmileIDSmartSelfieAuthentication({
+  factory SmileIDSmartSelfieCaptureView({
     Key? key,
-    // userId can't actually be null in the native SDK but we delegate their creation to
-    // the native platform code, since that's where the random ID creation happens
-    String? userId,
-    bool allowNewEnroll = false,
-    bool allowAgentMode = false,
-    bool showAttribution = true,
+    bool showConfirmationDialog = true,
     bool showInstructions = true,
-    bool skipApiSubmission = false,
-    Map<String, String>? extraPartnerParams,
+    bool showAttribution = true,
+    bool allowAgentMode = true,
     required Function(String resultJson) onSuccess,
     required Function(String errorMessage) onError,
   }) {
-    return SmileIDSmartSelfieAuthentication._(
+    return SmileIDSmartSelfieCaptureView._(
       onSuccess: onSuccess,
       onError: onError,
       creationParams: {
-        "userId": userId,
-        "allowNewEnroll": allowNewEnroll,
-        "allowAgentMode": allowAgentMode,
-        "showAttribution": showAttribution,
+        "showConfirmationDialog": showConfirmationDialog,
         "showInstructions": showInstructions,
-        "skipApiSubmission" : skipApiSubmission,
-        "extraPartnerParams" : extraPartnerParams,
+        "showAttribution": showAttribution,
+        "allowAgentMode": allowAgentMode,
       },
     );
   }

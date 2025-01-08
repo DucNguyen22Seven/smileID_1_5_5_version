@@ -3,13 +3,13 @@ import UIKit
 import SmileID
 import SwiftUI
 
-class SmileIDSmartSelfieEnrollment : NSObject, FlutterPlatformView, SmartSelfieResultDelegate, SmileIDFileUtilsProtocol {
+class SmileIDSmartSelfieEnrollmentEnhanced : NSObject, FlutterPlatformView, SmartSelfieResultDelegate,SmileIDFileUtilsProtocol {
     var fileManager: FileManager = Foundation.FileManager.default
     private var _view: UIView
     private var _channel: FlutterMethodChannel
     private var _childViewController: UIViewController?
 
-    static let VIEW_TYPE_ID = "SmileIDSmartSelfieEnrollment"
+    static let VIEW_TYPE_ID = "SmileIDSmartSelfieEnrollmentEnhanced"
 
     init(
         frame: CGRect,
@@ -19,18 +19,16 @@ class SmileIDSmartSelfieEnrollment : NSObject, FlutterPlatformView, SmartSelfieR
     ) {
         _view = UIView()
         _channel = FlutterMethodChannel(
-            name: "\(SmileIDSmartSelfieEnrollment.VIEW_TYPE_ID)_\(viewId)",
+            name: "\(SmileIDSmartSelfieEnrollmentEnhanced.VIEW_TYPE_ID)_\(viewId)",
             binaryMessenger: messenger
         )
         _childViewController = nil
         super.init()
-        let screen = SmileID.smartSelfieEnrollmentScreen(
+        let screen = EnhancedSelfieEnrollmentRootView.init(
             userId: args["userId"] as? String ?? "user-\(UUID().uuidString)",
             allowNewEnroll: args["allowNewEnroll"] as? Bool ?? false,
-            allowAgentMode: args["allowAgentMode"] as? Bool ?? false,
             showAttribution: args["showAttribution"] as? Bool ?? true,
             showInstructions: args["showInstructions"] as? Bool ?? true,
-            skipApiSubmission: args["skipApiSubmission"] as? Bool ?? false,
             extraPartnerParams: args["extraPartnerParams"] as? [String: String] ?? [:],
             delegate: self
         )
@@ -73,7 +71,7 @@ class SmileIDSmartSelfieEnrollment : NSObject, FlutterPlatformView, SmartSelfieR
             viewIdentifier viewId: Int64,
             arguments args: Any?
         ) -> FlutterPlatformView {
-            return SmileIDSmartSelfieEnrollment(
+            return SmileIDSmartSelfieEnrollmentEnhanced(
                 frame: frame,
                 viewIdentifier: viewId,
                 arguments: args as! [String: Any?],
@@ -83,6 +81,45 @@ class SmileIDSmartSelfieEnrollment : NSObject, FlutterPlatformView, SmartSelfieR
 
         public func createArgsCodec() -> FlutterMessageCodec & NSObjectProtocol {
               return FlutterStandardMessageCodec.sharedInstance()
+        }
+    }
+}
+
+struct SmartSelfieSuccessData: Encodable {
+    let selfieFile: String
+    let livenessFiles: [String]
+    let apiResponse: SmartSelfieResponse?
+    
+    func toJSONString() -> String? {
+        let jsonEncoder = JSONEncoder()
+        jsonEncoder.outputFormatting = .withoutEscapingSlashes
+        let json = try? jsonEncoder.encode(self)
+        guard let data = json,
+                let jsonString = String(data: data, encoding: .utf8) else {
+            return nil
+        }
+        return jsonString
+    }
+}
+
+struct EnhancedSelfieEnrollmentRootView: View {
+    let userId: String
+    let allowNewEnroll: Bool
+    let showAttribution: Bool
+    let showInstructions: Bool
+    let extraPartnerParams: [String: String]
+    let delegate: SmartSelfieResultDelegate
+
+    var body: some View {
+        NavigationView {
+            SmileID.smartSelfieEnrollmentScreenEnhanced(
+                userId: userId,
+                allowNewEnroll: allowNewEnroll,
+                showAttribution: showAttribution,
+                showInstructions: showInstructions,
+                extraPartnerParams: extraPartnerParams,
+                delegate: delegate
+            )
         }
     }
 }

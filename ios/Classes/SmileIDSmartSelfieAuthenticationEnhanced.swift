@@ -3,13 +3,13 @@ import UIKit
 import SmileID
 import SwiftUI
 
-class SmileIDDocumentVerification : NSObject, FlutterPlatformView, DocumentVerificationResultDelegate, SmileIDFileUtilsProtocol {
+class SmileIDSmartSelfieAuthenticationEnhanced : NSObject, FlutterPlatformView, SmartSelfieResultDelegate,SmileIDFileUtilsProtocol {
     var fileManager: FileManager = Foundation.FileManager.default
     private var _view: UIView
     private var _channel: FlutterMethodChannel
     private var _childViewController: UIViewController?
 
-    static let VIEW_TYPE_ID = "SmileIDDocumentVerification"
+    static let VIEW_TYPE_ID = "SmileIDSmartSelfieAuthenticationEnhanced"
 
     init(
         frame: CGRect,
@@ -19,27 +19,16 @@ class SmileIDDocumentVerification : NSObject, FlutterPlatformView, DocumentVerif
     ) {
         _view = UIView()
         _channel = FlutterMethodChannel(
-            name: "\(SmileIDDocumentVerification.VIEW_TYPE_ID)_\(viewId)",
+            name: "\(SmileIDSmartSelfieAuthenticationEnhanced.VIEW_TYPE_ID)_\(viewId)",
             binaryMessenger: messenger
         )
         _childViewController = nil
         super.init()
-        let bypassSelfieCaptureWithFile = (args["bypassSelfieCaptureWithFile"] as? String)
-            .flatMap { URL(string: $0) }
-        let screen = SmileID.documentVerificationScreen(
+        let screen = EnhancedSelfieAuthenticationRootView(
             userId: args["userId"] as? String ?? "user-\(UUID().uuidString)",
-            jobId: args["jobId"] as? String ?? "job-\(UUID().uuidString)",
             allowNewEnroll: args["allowNewEnroll"] as? Bool ?? false,
-            countryCode: args["countryCode"] as! String,
-            documentType: args["documentType"] as? String,
-            idAspectRatio: args["idAspectRatio"] as? Double,
-            bypassSelfieCaptureWithFile: bypassSelfieCaptureWithFile,
-            captureBothSides: args["captureBothSides"] as? Bool ?? true,
-            allowAgentMode: args["allowAgentMode"] as? Bool ?? false,
-            allowGalleryUpload: args["allowGalleryUpload"] as? Bool ?? false,
-            showInstructions: args["showInstructions"] as? Bool ?? true,
             showAttribution: args["showAttribution"] as? Bool ?? true,
-            skipApiSubmission: args["skipApiSubmission"] as? Bool ?? false,
+            showInstructions: args["showInstructions"] as? Bool ?? true,
             extraPartnerParams: args["extraPartnerParams"] as? [String: String] ?? [:],
             delegate: self
         )
@@ -49,21 +38,19 @@ class SmileIDDocumentVerification : NSObject, FlutterPlatformView, DocumentVerif
     func view() -> UIView {
         return _view
     }
-    
-    func didSucceed(selfie: URL, documentFrontImage: URL, documentBackImage: URL?, didSubmitDocumentVerificationJob: Bool) {
+
+    func didSucceed(selfieImage: URL, livenessImages: [URL], apiResponse: SmartSelfieResponse?) {
         _childViewController?.removeFromParent()
-        let arguments: [String: Any] = [
-            "selfieFile": getFilePath(fileName: selfie.absoluteString),
-            "documentFrontFile": getFilePath(fileName: documentFrontImage.absoluteString),
-            "didSubmitDocumentVerificationJob": didSubmitDocumentVerificationJob
-        ]
-        do {
-            let jsonData = try JSONSerialization.data(withJSONObject: arguments, options: [])
-            if let jsonString = String(data: jsonData, encoding: .utf8) {
-                _channel.invokeMethod("onSuccess", arguments: jsonString)
-            }
-        } catch {
-            didError(error: error)
+        let successData = SmartSelfieSuccessData(
+            selfieFile: getFilePath(fileName: selfieImage.absoluteString),
+            livenessFiles: livenessImages.map {
+                getFilePath(fileName: $0.absoluteString)
+            },
+            apiResponse: apiResponse
+        )
+
+        if let jsonString = successData.toJSONString() {
+            _channel.invokeMethod("onSuccess", arguments: jsonString)
         }
     }
 
@@ -84,16 +71,38 @@ class SmileIDDocumentVerification : NSObject, FlutterPlatformView, DocumentVerif
             viewIdentifier viewId: Int64,
             arguments args: Any?
         ) -> FlutterPlatformView {
-            return SmileIDDocumentVerification(
+            return SmileIDSmartSelfieAuthenticationEnhanced(
                 frame: frame,
                 viewIdentifier: viewId,
                 arguments: args as! [String: Any?],
                 binaryMessenger: messenger
             )
         }
-        
+
         public func createArgsCodec() -> FlutterMessageCodec & NSObjectProtocol {
               return FlutterStandardMessageCodec.sharedInstance()
+        }
+    }
+}
+
+struct EnhancedSelfieAuthenticationRootView: View {
+    let userId: String
+    let allowNewEnroll: Bool
+    let showAttribution: Bool
+    let showInstructions: Bool
+    let extraPartnerParams: [String: String]
+    let delegate: SmartSelfieResultDelegate
+
+    var body: some View {
+        NavigationView {
+            SmileID.smartSelfieAuthenticationScreenEnhanced(
+                userId: userId,
+                allowNewEnroll: allowNewEnroll,
+                showAttribution: showAttribution,
+                showInstructions: showInstructions,
+                extraPartnerParams: extraPartnerParams,
+                delegate: delegate
+            )
         }
     }
 }

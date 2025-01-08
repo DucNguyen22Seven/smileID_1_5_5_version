@@ -3,8 +3,8 @@ import UIKit
 import SmileID
 import SwiftUI
 
-class SmileIDSmartSelfieAuthentication : NSObject, FlutterPlatformView, SmartSelfieResultDelegate {
-    
+class SmileIDSmartSelfieAuthentication : NSObject, FlutterPlatformView, SmartSelfieResultDelegate, SmileIDFileUtilsProtocol {
+    var fileManager: FileManager = Foundation.FileManager.default
     private var _view: UIView
     private var _channel: FlutterMethodChannel
     private var _childViewController: UIViewController?
@@ -26,7 +26,6 @@ class SmileIDSmartSelfieAuthentication : NSObject, FlutterPlatformView, SmartSel
         super.init()
         let screen = SmileID.smartSelfieAuthenticationScreen(
             userId: args["userId"] as? String ?? "user-\(UUID().uuidString)",
-            jobId: args["jobId"] as? String ?? "job-\(UUID().uuidString)",
             allowNewEnroll: args["allowNewEnroll"] as? Bool ?? false,
             allowAgentMode: args["allowAgentMode"] as? Bool ?? false,
             showAttribution: args["showAttribution"] as? Bool ?? true,
@@ -43,25 +42,16 @@ class SmileIDSmartSelfieAuthentication : NSObject, FlutterPlatformView, SmartSel
 
     func didSucceed(selfieImage: URL, livenessImages: [URL], apiResponse: SmartSelfieResponse?) {
         _childViewController?.removeFromParent()
-        var arguments: [String: Any] = [
-            "selfieFile": selfieImage.absoluteString,
-            "livenessFiles": livenessImages.map { $0.absoluteString }
-        ]
-        if let apiResponse = apiResponse {
-            let encoder = JSONEncoder()
-            encoder.outputFormatting = .prettyPrinted
-            if let jsonData = try? encoder.encode(apiResponse),
-               let jsonString = String(data: jsonData, encoding: .utf8) {
-                arguments["apiResponse"] = jsonString
-            }
-        }
-        do {
-            let jsonData = try JSONSerialization.data(withJSONObject: arguments, options: [])
-            if let jsonString = String(data: jsonData, encoding: .utf8) {
-                _channel.invokeMethod("onSuccess", arguments: jsonString)
-            }
-        } catch {
-            didError(error: error)
+        let successData = SmartSelfieSuccessData(
+            selfieFile: getFilePath(fileName: selfieImage.absoluteString),
+            livenessFiles: livenessImages.map {
+                getFilePath(fileName: $0.absoluteString)
+            },
+            apiResponse: apiResponse
+        )
+
+        if let jsonString = successData.toJSONString() {
+            _channel.invokeMethod("onSuccess", arguments: jsonString)
         }
     }
 

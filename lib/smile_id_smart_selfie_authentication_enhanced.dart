@@ -4,8 +4,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-class SmileIDSmartSelfieAuthentication extends StatelessWidget {
-  static const String viewType = "SmileIDSmartSelfieAuthentication";
+class SmileIDSmartSelfieAuthenticationEnhanced extends StatelessWidget {
+  static const String viewType = "SmileIDSmartSelfieAuthenticationEnhanced";
   final Map<String, dynamic> creationParams;
 
   /// Called when the user successfully completes the smart selfie enrollment flow. The result is a
@@ -13,36 +13,32 @@ class SmileIDSmartSelfieAuthentication extends StatelessWidget {
   final Function(String) onSuccess;
   final Function(String) onError;
 
-  const SmileIDSmartSelfieAuthentication._({
+  const SmileIDSmartSelfieAuthenticationEnhanced._({
     required this.creationParams,
     required this.onSuccess,
     required this.onError,
   });
 
-  factory SmileIDSmartSelfieAuthentication({
+  factory SmileIDSmartSelfieAuthenticationEnhanced({
     Key? key,
     // userId can't actually be null in the native SDK but we delegate their creation to
     // the native platform code, since that's where the random ID creation happens
     String? userId,
     bool allowNewEnroll = false,
-    bool allowAgentMode = false,
     bool showAttribution = true,
     bool showInstructions = true,
-    bool skipApiSubmission = false,
     Map<String, String>? extraPartnerParams,
     required Function(String resultJson) onSuccess,
     required Function(String errorMessage) onError,
   }) {
-    return SmileIDSmartSelfieAuthentication._(
+    return SmileIDSmartSelfieAuthenticationEnhanced._(
       onSuccess: onSuccess,
       onError: onError,
       creationParams: {
         "userId": userId,
         "allowNewEnroll": allowNewEnroll,
-        "allowAgentMode": allowAgentMode,
         "showAttribution": showAttribution,
         "showInstructions": showInstructions,
-        "skipApiSubmission" : skipApiSubmission,
         "extraPartnerParams" : extraPartnerParams,
       },
     );
